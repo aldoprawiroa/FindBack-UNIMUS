@@ -20,7 +20,11 @@
         </ul>
     @endif
 
-    <form action="{{ route('found-items.store') }}" method="POST">
+    <form
+        action="{{ route('found-items.store') }}"
+        method="POST"
+        enctype="multipart/form-data"
+    >
         @csrf
 
         <div>
@@ -67,6 +71,19 @@
                 value="{{ old('found_at') }}"
                 required
             >
+        </div>
+
+        <div>
+            <label for="photo">Foto Barang (Opsional)</label>
+            <input
+                type="file"
+                id="photo"
+                name="photo"
+                accept=".jpg,.jpeg,.png,.webp"
+            >
+            <small>
+                Format JPG, JPEG, PNG, atau WebP. Maksimal 2 MB.
+            </small>
         </div>
 
         <button type="submit">Simpan sebagai Draft</button>

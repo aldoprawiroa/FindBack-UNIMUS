@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'found_at',
     'status',
     'published_at',
+    'photo_path',
 ])]
+
 class FoundItem extends Model
 {
     public function category(): BelongsTo

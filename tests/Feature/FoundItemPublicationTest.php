@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\FoundItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class FoundItemPublicationTest extends TestCase
@@ -149,5 +152,113 @@ class FoundItemPublicationTest extends TestCase
         $response->assertSessionHasErrors('found_at');
 
         $this->assertDatabaseCount('found_items', 0);
+    }
+
+    public function test_found_item_can_be_saved_with_private_jpg_photo(): void
+    {
+        Storage::fake('local');
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $photo = UploadedFile::fake()->image('handphone.jpg');
+
+        $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'HP Hitam',
+            'category_id' => $category->id,
+            'found_at' => '2026-11-05 08:00:00',
+            'photo' => $photo,
+        ])->assertRedirect(route('found-items.create'));
+
+        $foundItem = FoundItem::where('title', 'HP Hitam')->firstOrFail();
+
+        $this->assertNotNull($foundItem->photo_path);
+        Storage::disk('local')->assertExists($foundItem->photo_path);
+        Storage::disk('public')->assertMissing($foundItem->photo_path);
+    }
+
+    public function test_found_item_can_be_saved_with_private_png_photo(): void
+    {
+        Storage::fake('local');
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $photo = UploadedFile::fake()->image('handphone.png');
+
+        $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'HP Putih',
+            'category_id' => $category->id,
+            'found_at' => '2026-11-05 08:00:00',
+            'photo' => $photo,
+        ])->assertRedirect(route('found-items.create'));
+
+        $foundItem = FoundItem::where('title', 'HP Putih')->firstOrFail();
+
+        $this->assertNotNull($foundItem->photo_path);
+        Storage::disk('local')->assertExists($foundItem->photo_path);
+        Storage::disk('public')->assertMissing($foundItem->photo_path);
+    }
+
+    public function test_found_item_rejects_non_image_photo(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        foreach (['dokumen.txt', 'dokumen.pdf'] as $filename) {
+            $response = $this->actingAs($user)->post(route('found-items.store'), [
+                'title' => 'Barang Uji',
+                'category_id' => $category->id,
+                'found_at' => '2026-11-05 08:00:00',
+                'photo' => UploadedFile::fake()->create($filename, 100),
+            ]);
+
+            $response->assertSessionHasErrors('photo');
+        }
+
+        $this->assertDatabaseCount('found_items', 0);
+        $this->assertEmpty(Storage::disk('local')->allFiles('found-items'));
+    }
+
+    public function test_found_item_rejects_photo_larger_than_2_mb(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $photo = UploadedFile::fake()->image('large.jpg')->size(2049);
+
+        $response = $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'Barang Uji',
+            'category_id' => $category->id,
+            'found_at' => '2026-11-05 08:00:00',
+            'photo' => $photo,
+        ]);
+
+        $response->assertSessionHasErrors('photo');
+
+        $this->assertDatabaseCount('found_items', 0);
+        $this->assertEmpty(Storage::disk('local')->allFiles('found-items'));
     }
 }
