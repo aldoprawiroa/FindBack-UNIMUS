@@ -18,6 +18,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FoundItem extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'found_at' => 'datetime',
+            'published_at' => 'datetime',
+        ];
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
