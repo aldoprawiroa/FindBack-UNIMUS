@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FoundItemController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,4 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/catalog', function () {
         return response('Katalog Barang Temuan UNIMUS (Terlindungi)');
     })->name('catalog.index');
+
+    Route::get('/found-items/create', [FoundItemController::class, 'create'])
+        ->name('found-items.create');
+
+    Route::post('/found-items', [FoundItemController::class, 'store'])
+        ->name('found-items.store');
 });
