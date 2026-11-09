@@ -11,22 +11,30 @@ class CatalogController extends Controller
 {
     public function index(Request $request): View
     {
+        // Validasi parameter pencarian dan kategori.
+        // Parameter array akan ditolak oleh validasi Laravel.
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'integer'],
+        ]);
+
+        // Aturan visibilitas katalog.
         $query = FoundItem::query()
             ->with('category')
-            ->where('status', '!=', 'Archived')
-            ->where(function ($query) {
-                $query->whereNotNull('published_at')
-                    ->orWhere('status', 'Returned');
-            });
+            ->whereIn('status', ['Published', 'Returned'])
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
+        // Pencarian judul.
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
 
             $query->where('title', 'like', "%{$search}%");
         }
 
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->input('category'));
+        // Filter kategori.
+        if (! empty($validated['category'])) {
+            $query->where('category_id', $validated['category']);
         }
 
         $items = $query
@@ -43,4 +51,5 @@ class CatalogController extends Controller
             'categories'
         ));
     }
+
 }
