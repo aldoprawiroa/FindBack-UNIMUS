@@ -18,7 +18,7 @@
                     id="search"
                     name="search"
                     value="{{ request('search') }}"
-                    placeholder="Masukkan nama barang..."
+                    placeholder="Masukkan nama atau deskripsi barang..."
                 >
             </div>
 

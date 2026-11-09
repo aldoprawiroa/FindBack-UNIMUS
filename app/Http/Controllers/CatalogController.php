@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\FoundItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -22,7 +23,10 @@ class CatalogController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
 
-            $query->where('title', 'like', "%{$search}%");
+            $query->where(function (Builder $query) use ($search): void {
+                $query->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($request->filled('category')) {
