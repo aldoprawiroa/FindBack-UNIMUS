@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -115,7 +117,7 @@ class AuthTest extends TestCase
      */
     public function test_invalid_login_is_throttled_after_repeated_failures(): void
     {
-        \Illuminate\Support\Facades\Event::fake([\Illuminate\Auth\Events\Lockout::class]);
+        Event::fake([Lockout::class]);
 
         $email = 'satpam@unimus.ac.id';
         $throttleKey = Str::transliterate(Str::lower($email).'|127.0.0.1');
@@ -142,7 +144,7 @@ class AuthTest extends TestCase
         $this->assertStringContainsString('Too many login attempts', $errorMessage);
         $this->assertGuest();
 
-        \Illuminate\Support\Facades\Event::assertDispatched(\Illuminate\Auth\Events\Lockout::class, function ($event) use ($email) {
+        Event::assertDispatched(Lockout::class, function ($event) use ($email) {
             return Str::lower(trim($event->request->input('email'))) === $email;
         });
     }
@@ -293,5 +295,22 @@ class AuthTest extends TestCase
         $response->assertRedirect(route('catalog.index'));
         $this->assertAuthenticatedAs($user);
         $response->assertCookie(Auth::guard()->getRecallerName());
+    }
+
+    /**
+     * Test authenticated user sees logout button and username in navigation.
+     */
+    public function test_authenticated_user_sees_logout_button_and_username_in_navigation(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Aldo Prawiro',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('catalog.index'));
+
+        $response->assertOk();
+        $response->assertSee('Aldo Prawiro');
+        $response->assertSee('Keluar');
+        $response->assertSee(route('logout'));
     }
 }
