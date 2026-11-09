@@ -82,7 +82,7 @@ class FoundItemPublicationTest extends TestCase
             'title' => 'HP Hitam',
             'description' => 'HP ditemukan di area kampus',
             'category_id' => $category->id,
-            'found_at' => '2026-11-05 08:00:00',
+            'found_at' => '2026-11-05T08:00',
         ]);
 
         $response->assertRedirect(route('found-items.create'));
@@ -260,5 +260,63 @@ class FoundItemPublicationTest extends TestCase
 
         $this->assertDatabaseCount('found_items', 0);
         $this->assertEmpty(Storage::disk('local')->allFiles('found-items'));
+    }
+
+    public function test_found_item_rejects_category_id_array(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'HP Hitam',
+            'description' => 'HP ditemukan di area kampus',
+            'category_id' => ['1'],
+            'found_at' => '2026-11-05T08:00',
+        ]);
+
+        $response->assertSessionHasErrors('category_id');
+
+        $this->assertDatabaseCount('found_items', 0);
+    }
+
+    public function test_found_item_rejects_description_longer_than_2000_characters(): void
+    {
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'HP Hitam',
+            'description' => str_repeat('A', 2001),
+            'category_id' => $category->id,
+            'found_at' => '2026-11-05T08:00',
+        ]);
+
+        $response->assertSessionHasErrors('description');
+
+        $this->assertDatabaseCount('found_items', 0);
+    }
+
+    public function test_found_item_rejects_date_outside_mysql_timestamp_range(): void
+    {
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('found-items.store'), [
+            'title' => 'HP Hitam',
+            'description' => 'HP ditemukan di area kampus',
+            'category_id' => $category->id,
+            'found_at' => '2200-01-01T08:00',
+        ]);
+
+        $response->assertSessionHasErrors('found_at');
+
+        $this->assertDatabaseCount('found_items', 0);
     }
 }
