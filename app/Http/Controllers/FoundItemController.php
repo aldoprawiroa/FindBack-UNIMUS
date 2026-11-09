@@ -24,11 +24,22 @@ class FoundItemController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'found_at' => ['required', 'date'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'category_id' => [
+                'bail',
+                'required',
+                'integer',
+                'exists:categories,id',
+            ],
+            'found_at' => [
+                'required',
+                'date',
+                'after_or_equal:1970-01-01 00:00:01',
+                'before_or_equal:2038-01-19 03:14:07',
+            ],
             'photo' => [
                 'nullable',
                 'image',
