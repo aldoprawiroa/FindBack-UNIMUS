@@ -69,6 +69,18 @@ class FoundItemPublicationTest extends TestCase
         $response->assertDontSee('Kunci motor');
     }
 
+    public function test_catalog_rejects_array_search_and_category_filters(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('catalog.index', [
+            'search' => ['tas'],
+            'category' => ['1'],
+        ]));
+
+        $response->assertSessionHasErrors(['search', 'category']);
+    }
+
     public function test_guest_is_redirected_to_login_when_accessing_found_items_create(): void
     {
         $response = $this->get(route('found-items.create'));
