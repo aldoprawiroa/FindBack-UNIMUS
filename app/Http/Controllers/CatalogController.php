@@ -12,6 +12,11 @@ class CatalogController extends Controller
 {
     public function index(Request $request): View
     {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'integer'],
+        ]);
+
         $query = FoundItem::query()
             ->with('category')
             ->where('status', '!=', 'Archived')
@@ -20,8 +25,8 @@ class CatalogController extends Controller
                     ->orWhere('status', 'Returned');
             });
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
 
             $query->where(function (Builder $query) use ($search): void {
                 $query->where('title', 'like', "%{$search}%")
@@ -29,8 +34,8 @@ class CatalogController extends Controller
             });
         }
 
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->input('category'));
+        if (! empty($validated['category'])) {
+            $query->where('category_id', $validated['category']);
         }
 
         $items = $query
