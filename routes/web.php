@@ -1,10 +1,22 @@
 <?php
 
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\FoundItemController;
 use Illuminate\Support\Facades\Route;
 
+    // Fitur pengembalian barang
+    Route::middleware('role:admin,security')->group(function () {
+        Route::get('/returns/create', [ReturnController::class, 'create'])
+            ->name('returns.create');
+
+        Route::post('/returns', [ReturnController::class, 'store'])
+            ->name('returns.store');
+
+        Route::get('/returns', [ReturnController::class, 'index'])
+            ->name('returns.index');
+    });
 Route::get('/', function () {
     return view('welcome');
 });

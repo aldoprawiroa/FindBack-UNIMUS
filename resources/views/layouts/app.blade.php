@@ -19,10 +19,23 @@
     {{-- Header --}}
     <header>
         <nav aria-label="Navigasi utama">
-            <a href="{{ url('/') }}">
-                FindBack
+    <a href="{{ url('/') }}">
+        FindBack
+    </a>
+
+    @auth
+        @if (in_array(auth()->user()->role, ['admin', 'security'], true))
+            <a href="{{ route('returns.create') }}">
+                Form Pengembalian
             </a>
-        </nav>
+
+            <a href="{{ route('returns.index') }}">
+                Riwayat Pengembalian
+            </a>
+        @endif
+    @endauth
+</nav>
+
     </header>
 
     {{-- Main Content --}}
