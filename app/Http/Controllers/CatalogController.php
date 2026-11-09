@@ -15,7 +15,7 @@ class CatalogController extends Controller
         // Parameter array akan ditolak oleh validasi Laravel.
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
-            'category' => ['nullable', 'integer'],
+            'category' => ['nullable', 'integer', 'exists:categories,id'],
         ]);
 
         // Aturan visibilitas katalog.
@@ -51,5 +51,4 @@ class CatalogController extends Controller
             'categories'
         ));
     }
-
 }
