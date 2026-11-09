@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\FoundItem;
 use App\Models\ReturnRecord;
 use App\Models\SecurityPost;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+
 class ReturnController extends Controller
 {
     public function create(): View
