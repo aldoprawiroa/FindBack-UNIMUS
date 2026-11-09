@@ -33,6 +33,42 @@ class FoundItemPublicationTest extends TestCase
         $response->assertSee('Elektronik');
     }
 
+    public function test_catalog_search_matches_item_descriptions(): void
+    {
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        FoundItem::create([
+            'title' => 'Tas hitam',
+            'description' => 'Ditemukan di perpustakaan',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Published',
+            'published_at' => now(),
+        ]);
+
+        FoundItem::create([
+            'title' => 'Kunci motor',
+            'description' => 'Ditemukan di kantin',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('catalog.index', [
+            'search' => 'perpustakaan',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Tas hitam');
+        $response->assertDontSee('Kunci motor');
+    }
+
     public function test_guest_is_redirected_to_login_when_accessing_found_items_create(): void
     {
         $response = $this->get(route('found-items.create'));
