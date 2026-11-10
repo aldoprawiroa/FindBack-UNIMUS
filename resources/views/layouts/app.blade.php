@@ -24,6 +24,10 @@
     </a>
 
     @auth
+        <a href="{{ route('catalog.index') }}">
+            Katalog
+        </a>
+
         @if (in_array(auth()->user()->role, ['admin', 'security'], true))
             <a href="{{ route('returns.create') }}">
                 Form Pengembalian
@@ -35,6 +39,7 @@
         @endif
 
         <span>{{ auth()->user()->name }}</span>
+        <span>({{ ucfirst(auth()->user()->role ?? 'mahasiswa') }})</span>
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf
             <button type="submit">Keluar</button>
