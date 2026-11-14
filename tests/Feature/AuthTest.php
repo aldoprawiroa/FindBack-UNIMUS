@@ -201,6 +201,31 @@ class AuthTest extends TestCase
     }
 
     /**
+     * Test guest attempting to visit returns route is redirected to login.
+     */
+    public function test_guest_attempting_to_visit_returns_route_is_redirected_to_login(): void
+    {
+        $response = $this->get(route('returns.index'));
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    /**
+     * Test authenticated user without an allowed role cannot access returns route.
+     */
+    public function test_authenticated_user_without_returns_role_is_forbidden(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('returns.index'));
+
+        $response->assertForbidden();
+    }
+
+    /**
      * Test authenticated user can access protected catalog route.
      */
     public function test_authenticated_user_can_access_protected_catalog_route(): void

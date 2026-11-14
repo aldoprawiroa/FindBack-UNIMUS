@@ -17,11 +17,6 @@
     <div class="w-full max-w-md space-y-8">
         <!-- Header & Branding -->
         <div class="text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">FindBack UNIMUS</h1>
             <p class="mt-2 text-sm text-slate-600">
                 Sistem Informasi Temuan Barang Kampus Universitas Muhammadiyah Semarang
