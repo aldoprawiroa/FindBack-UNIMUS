@@ -38,6 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/found-items/create', [FoundItemController::class, 'create'])
         ->name('found-items.create');
 
+    // Protected item detail route
+    Route::get('/found-items/{foundItem}', [FoundItemController::class, 'show'])
+        ->whereNumber('foundItem')
+        ->name('found-items.show');
+
     Route::post('/found-items', [FoundItemController::class, 'store'])
         ->name('found-items.store');
 });
