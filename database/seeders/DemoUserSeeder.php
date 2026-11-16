@@ -16,7 +16,7 @@ class DemoUserSeeder extends Seeder
 
         $password = config('app.demo_user_password');
 
-        if (! is_string($password) || $password === '') {
+        if (! is_string($password) || trim($password) === '') {
             throw new RuntimeException('Set DEMO_USER_PASSWORD before seeding demo accounts.');
         }
 
