@@ -43,4 +43,36 @@ class DemoUserSeederTest extends TestCase
 
         $this->assertSame(0, User::count());
     }
+
+    public function test_demo_accounts_cannot_be_seeded_in_production(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+        config()->set('app.demo_user_password', 'demo-secret');
+
+        try {
+            app(DemoUserSeeder::class)->run();
+            $this->fail('Expected the demo seeder to reject production.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Demo accounts can only be seeded in local or testing environments.', $exception->getMessage());
+        }
+
+        $this->assertSame(0, User::count());
+    }
+
+    public function test_existing_account_with_demo_email_is_not_overwritten(): void
+    {
+        config()->set('app.demo_user_password', 'demo-secret');
+        $existing = User::factory()->create([
+            'email' => 'admin@unimus.ac.id',
+            'role' => 'mahasiswa',
+            'password' => 'existing-secret',
+        ]);
+
+        $this->seed(DemoUserSeeder::class);
+
+        $existing->refresh();
+        $this->assertSame('mahasiswa', $existing->role);
+        $this->assertTrue(Hash::check('existing-secret', $existing->password));
+        $this->assertSame(3, User::count());
+    }
 }
