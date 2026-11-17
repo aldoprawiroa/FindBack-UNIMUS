@@ -24,7 +24,6 @@ class FoundItemController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -80,5 +79,46 @@ class FoundItemController extends Controller
         return redirect()
             ->route('found-items.create')
             ->with('success', 'Barang temuan berhasil disimpan sebagai Draft.');
+    }
+
+    /**
+     * Publish a draft found item.
+     */
+    public function publish(FoundItem $foundItem): RedirectResponse
+    {
+        abort_unless(
+            $foundItem->status === 'Draft',
+            409,
+            'Hanya barang dengan status Draft yang dapat dipublikasikan.'
+        );
+
+        $foundItem->update([
+            'status' => 'Published',
+            'published_at' => now(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Barang temuan berhasil dipublikasikan.');
+    }
+
+    /**
+     * Archive a published found item.
+     */
+    public function archive(FoundItem $foundItem): RedirectResponse
+    {
+        abort_unless(
+            $foundItem->status === 'Published',
+            409,
+            'Hanya barang berstatus Published yang dapat diarsipkan.'
+        );
+
+        $foundItem->update([
+            'status' => 'Archived',
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Barang temuan berhasil diarsipkan.');
     }
 }
