@@ -20,6 +20,10 @@ class DemoUserSeeder extends Seeder
             throw new RuntimeException('Set DEMO_USER_PASSWORD before seeding demo accounts.');
         }
 
+        if (strlen($password) < 8) {
+            throw new RuntimeException('DEMO_USER_PASSWORD must be at least 8 characters.');
+        }
+
         foreach ([
             ['name' => 'Mahasiswa Demo', 'email' => 'mahasiswa@unimus.ac.id', 'role' => 'mahasiswa'],
             ['name' => 'Dosen Demo', 'email' => 'dosen@unimus.ac.id', 'role' => 'dosen'],
