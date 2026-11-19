@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
+use App\Models\FoundItem;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -42,5 +45,30 @@ class CategorySchemaTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    public function test_category_has_many_found_items(): void
+    {
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $item = FoundItem::create([
+            'title' => 'Laptop Hitam',
+            'category_id' => $category->id,
+            'found_at' => now(),
+        ]);
+
+        $this->assertInstanceOf(
+            HasMany::class,
+            $category->foundItems()
+        );
+
+        $this->assertTrue(
+            $category->foundItems()
+                ->whereKey($item->id)
+                ->exists()
+        );
     }
 }

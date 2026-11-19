@@ -367,4 +367,220 @@ class FoundItemPublicationTest extends TestCase
 
         $this->assertDatabaseCount('found_items', 0);
     }
+
+    /**
+     * Admin can publish a draft found item.
+     */
+    public function test_admin_can_publish_draft_found_item(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'HP Hitam',
+            'description' => 'HP ditemukan di perpustakaan',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Draft',
+            'published_at' => null,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('found-items.publish', $foundItem));
+
+        $response->assertRedirect();
+
+        $foundItem->refresh();
+
+        $this->assertSame('Published', $foundItem->status);
+        $this->assertNotNull($foundItem->published_at);
+    }
+
+    /**
+     * Non-admin users cannot publish a draft found item.
+     */
+    public function test_non_admin_cannot_publish_draft_found_item(): void
+    {
+        $mahasiswa = User::factory()->create([
+            'role' => 'mahasiswa',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'Laptop Hitam',
+            'description' => 'Laptop ditemukan di perpustakaan',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Draft',
+            'published_at' => null,
+        ]);
+
+        $response = $this->actingAs($mahasiswa)
+            ->post(route('found-items.publish', $foundItem));
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('found_items', [
+            'id' => $foundItem->id,
+            'status' => 'Draft',
+            'published_at' => null,
+        ]);
+    }
+
+    /**
+     * Admin can archive a published found item.
+     */
+    public function test_admin_can_archive_published_found_item(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'Laptop Biru',
+            'description' => 'Laptop ditemukan di perpustakaan',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('found-items.archive', $foundItem));
+
+        $response->assertRedirect();
+
+        $foundItem->refresh();
+
+        $this->assertSame('Archived', $foundItem->status);
+        $this->assertNotNull($foundItem->published_at);
+
+        $this->assertDatabaseHas('found_items', [
+            'id' => $foundItem->id,
+            'status' => 'Archived',
+        ]);
+    }
+
+    /**
+     * Non-admin users cannot archive a published found item.
+     */
+    public function test_non_admin_cannot_archive_published_found_item(): void
+    {
+        $mahasiswa = User::factory()->create([
+            'role' => 'mahasiswa',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'Laptop Hitam',
+            'description' => 'Laptop ditemukan di perpustakaan',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($mahasiswa)
+            ->post(route('found-items.archive', $foundItem));
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('found_items', [
+            'id' => $foundItem->id,
+            'status' => 'Published',
+        ]);
+    }
+
+
+    /**
+     * Admin cannot archive a draft found item.
+     */
+    public function test_admin_cannot_archive_draft_found_item(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'Tas Hitam',
+            'description' => 'Tas ditemukan di kelas',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Draft',
+            'published_at' => null,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('found-items.archive', $foundItem));
+
+        $response->assertStatus(409);
+
+        $this->assertDatabaseHas('found_items', [
+            'id' => $foundItem->id,
+            'status' => 'Draft',
+            'published_at' => null,
+        ]);
+    }
+
+
+    /**
+     * Admin cannot publish an archived found item.
+     */
+    public function test_admin_cannot_publish_archived_found_item(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $foundItem = FoundItem::create([
+            'title' => 'Tas Merah',
+            'description' => 'Tas ditemukan di kelas',
+            'category_id' => $category->id,
+            'found_at' => now(),
+            'status' => 'Archived',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('found-items.publish', $foundItem));
+
+        $response->assertStatus(409);
+
+        $this->assertDatabaseHas('found_items', [
+            'id' => $foundItem->id,
+            'status' => 'Archived',
+        ]);
+    }
+
+
+
 }

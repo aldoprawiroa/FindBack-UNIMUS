@@ -16,8 +16,12 @@ class DemoUserSeeder extends Seeder
 
         $password = config('app.demo_user_password');
 
-        if (! is_string($password) || $password === '') {
+        if (! is_string($password) || trim($password) === '') {
             throw new RuntimeException('Set DEMO_USER_PASSWORD before seeding demo accounts.');
+        }
+
+        if (strlen($password) < 8) {
+            throw new RuntimeException('DEMO_USER_PASSWORD must be at least 8 characters.');
         }
 
         foreach ([
