@@ -124,10 +124,11 @@ Pengujian mencakup:
 - Validasi tanggal penemuan.
 - Pembatasan publikasi dan pengarsipan berdasarkan role.
 - Penolakan transisi status yang tidak valid.
+- Pembersihan foto privat ketika penyimpanan data barang gagal.
 
 Hasil pengujian terakhir yang telah dijalankan:
 
-**23 tests passed, 80 assertions.**
+24 tests passed, 83 assertions.
 
 ## 8. Struktur Folder Penting
 
