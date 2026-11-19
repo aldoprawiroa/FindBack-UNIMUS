@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class DemoUserSeeder extends Seeder
@@ -20,7 +21,7 @@ class DemoUserSeeder extends Seeder
             throw new RuntimeException('Set DEMO_USER_PASSWORD before seeding demo accounts.');
         }
 
-        if (strlen($password) < 8) {
+        if (Str::length($password) < 8) {
             throw new RuntimeException('DEMO_USER_PASSWORD must be at least 8 characters.');
         }
 
