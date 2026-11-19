@@ -57,4 +57,30 @@ class DemoUserSeederTest extends TestCase
 
         $this->assertSame(0, User::count());
     }
+
+    public function test_eight_character_demo_password_is_accepted(): void
+    {
+        config()->set('app.demo_user_password', 'demo1234');
+
+        $this->seed(DemoUserSeeder::class);
+
+        $this->assertSame(3, User::count());
+        $this->assertTrue(Hash::check('demo1234', User::where('email', 'admin@unimus.ac.id')->firstOrFail()->password));
+    }
+
+    public function test_reseeding_with_a_new_password_preserves_existing_passwords(): void
+    {
+        config()->set('app.demo_user_password', 'original-secret');
+        $this->seed(DemoUserSeeder::class);
+
+        config()->set('app.demo_user_password', 'replacement-secret');
+        $this->seed(DemoUserSeeder::class);
+
+        $this->assertSame(3, User::count());
+
+        foreach (User::all() as $user) {
+            $this->assertTrue(Hash::check('original-secret', $user->password));
+            $this->assertFalse(Hash::check('replacement-secret', $user->password));
+        }
+    }
 }
