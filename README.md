@@ -21,6 +21,16 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Demo Accounts
+
+Demo accounts can only be seeded in local or testing environments. Set a local `DEMO_USER_PASSWORD` value with at least eight characters in `.env`, then run:
+
+```bash
+php artisan db:seed --class="Database\Seeders\DemoUserSeeder"
+```
+
+The default `php artisan db:seed` command does not create demo accounts. Re-running the demo seeder will not replace passwords for accounts that already exist. Do not commit real passwords.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
