@@ -158,3 +158,67 @@ Hasil pengujian terakhir yang telah dijalankan:
 Proyek FindBack dikembangkan oleh Kelompok 5 Universitas Muhammadiyah Semarang (UNIMUS).
 
 Setiap anggota bertanggung jawab atas modul, backend, halaman, pengujian, dokumentasi, Pull Request, dan demonstrasi sesuai pembagian tugas kelompok.
+
+## 10. Katalog Barang Temuan
+
+Katalog barang temuan dapat diakses oleh pengguna yang sudah login.
+
+Fitur katalog meliputi:
+
+- Menampilkan barang dengan status `Published` atau `Returned`.
+- Hanya menampilkan barang yang waktu publikasinya sudah tercapai (`published_at` tidak kosong dan tidak lebih dari waktu saat ini).
+- Pencarian berdasarkan judul atau deskripsi barang.
+- Filter berdasarkan kategori.
+- Pagination dengan 9 barang pada setiap halaman.
+- Mempertahankan parameter pencarian dan filter ketika berpindah halaman.
+
+Barang dengan status `Draft` atau `Archived` tidak ditampilkan pada katalog.
+
+## 11. Halaman Detail Barang
+
+Setiap barang pada katalog memiliki tautan menuju halaman detail.
+
+Informasi yang ditampilkan pada halaman detail meliputi:
+
+- Nama barang.
+- Kategori.
+- Deskripsi.
+- Waktu barang ditemukan.
+- Status barang.
+
+Waktu barang ditampilkan menggunakan zona waktu `Asia/Jakarta`.
+
+Halaman detail hanya dapat diakses oleh pengguna yang sudah login. Barang yang berstatus `Draft`, `Archived`, belum memiliki waktu publikasi, atau memiliki waktu publikasi di masa mendatang akan menghasilkan respons HTTP 404.
+
+Informasi privat seperti data penerima dan catatan verifikasi tidak ditampilkan pada halaman detail.
+
+## 12. Pengujian Katalog dan Detail Barang
+
+Pengujian katalog dan halaman detail berada pada:
+
+- `tests/Feature/CatalogCategoryFilterTest.php`
+- `tests/Feature/FoundItemDetailTest.php`
+
+Jalankan pengujian detail barang dengan:
+
+```bash
+php artisan test --filter=FoundItemDetailTest
+```
+
+Jalankan seluruh pengujian aplikasi dengan:
+
+```bash
+php artisan test
+```
+
+Pengujian halaman detail mencakup:
+
+- Pengguna yang sudah login dapat melihat detail barang yang dipublikasikan.
+- Pengguna yang belum login diarahkan ke halaman login.
+- Barang berstatus Draft menghasilkan respons 404.
+- Barang berstatus Archived menghasilkan respons 404.
+- Barang dengan waktu publikasi di masa mendatang menghasilkan respons 404.
+- Barang berstatus Returned dapat dilihat jika sudah dipublikasikan.
+- Barang tanpa waktu publikasi menghasilkan respons 404.
+
+Hasil pengujian lengkap terakhir: **85 tests passed, 282 assertions**.
