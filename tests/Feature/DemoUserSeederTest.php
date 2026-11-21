@@ -58,6 +58,20 @@ class DemoUserSeederTest extends TestCase
         $this->assertSame(0, User::count());
     }
 
+    public function test_demo_password_shorter_than_eight_unicode_characters_is_rejected(): void
+    {
+        config()->set('app.demo_user_password', 'ééééééé');
+
+        try {
+            $this->seed(DemoUserSeeder::class);
+            $this->fail('Expected the demo seeder to reject a password shorter than eight characters.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('DEMO_USER_PASSWORD must be at least 8 characters.', $exception->getMessage());
+        }
+
+        $this->assertSame(0, User::count());
+    }
+
     public function test_eight_character_demo_password_is_accepted(): void
     {
         config()->set('app.demo_user_password', 'demo1234');

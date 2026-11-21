@@ -22,6 +22,16 @@ FindBack merupakan aplikasi berbasis web untuk membantu pengelolaan informasi ba
 - Blade
 - Tailwind CSS
 - Vite
+## Demo Accounts
+
+Demo accounts can only be seeded in local or testing environments. Set a local `DEMO_USER_PASSWORD` value with at least eight characters in `.env`, then run:
+
+```bash
+php artisan db:seed --class="Database\Seeders\DemoUserSeeder"
+```
+
+The default `php artisan db:seed` command does not create demo accounts. Re-running the demo seeder will not replace passwords for accounts that already exist. Do not commit real passwords.
+
 
 ## 3. Struktur Data Barang Temuan
 
