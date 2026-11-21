@@ -13,6 +13,21 @@ use Throwable;
 
 class FoundItemController extends Controller
 {
+    public function show(FoundItem $foundItem): View
+    {
+        abort_unless(
+            in_array($foundItem->status, ['Published', 'Returned'], true)
+            && $foundItem->published_at !== null
+            && $foundItem->published_at->lte(now()),
+            404
+        );
+
+        $foundItem->load('category');
+
+        return view('found-items.show', [
+            'item' => $foundItem,
+        ]);
+    }
     public function create(): View
     {
         $categories = Category::query()
