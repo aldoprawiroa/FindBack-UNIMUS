@@ -16,6 +16,14 @@ class SecurityPost extends Model
         ];
     }
 
+    /**
+     * Pengguna atau petugas keamanan yang ditugaskan di pos ini.
+     */
+    public function assignedUsers(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
     public function returnRecords(): HasMany
     {
         return $this->hasMany(ReturnRecord::class);

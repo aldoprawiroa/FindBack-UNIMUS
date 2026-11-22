@@ -45,16 +45,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/found-items/create', [FoundItemController::class, 'create'])
         ->name('found-items.create');
 
+    // Protected item detail route
+    Route::get('/found-items/{foundItem}', [FoundItemController::class, 'show'])
+        ->whereNumber('foundItem')
+        ->name('found-items.show');
+
     // Simpan barang temuan sebagai Draft
     Route::post('/found-items', [FoundItemController::class, 'store'])
         ->name('found-items.store');
 
-   // Pengelolaan status barang (Admin saja)
+    // Pengelolaan status barang (Admin saja)
     Route::middleware('role:admin')->group(function () {
         Route::post('/found-items/{foundItem}/publish', [FoundItemController::class, 'publish'])
-        ->name('found-items.publish');
+            ->name('found-items.publish');
 
         Route::post('/found-items/{foundItem}/archive', [FoundItemController::class, 'archive'])
-        ->name('found-items.archive');
+            ->name('found-items.archive');
     });
 });

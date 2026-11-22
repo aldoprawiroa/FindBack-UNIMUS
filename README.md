@@ -1,58 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FindBack UNIMUS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Sistem Informasi Barang Temuan Universitas Muhammadiyah Semarang (UNIMUS)**
 
-## About Laravel
+FindBack merupakan aplikasi berbasis web untuk membantu pengelolaan informasi barang temuan di lingkungan Universitas Muhammadiyah Semarang.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Formulir input barang temuan.
+- Penyimpanan data barang temuan sebagai Draft.
+- Pengelolaan status publikasi barang.
+- Pengarsipan barang temuan.
+- Penyimpanan foto barang secara privat.
+- Validasi data barang dan foto.
+- Katalog barang temuan dengan pencarian dan filter kategori.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 2. Teknologi
 
-## Learning Laravel
+- Laravel 13
+- PHP 8.3
+- MySQL
+- Blade
+- Tailwind CSS
+- Vite
+## Demo Accounts
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Demo accounts can only be seeded in local or testing environments. Set a local `DEMO_USER_PASSWORD` value with at least eight characters in `.env`, then run:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan db:seed --class="Database\Seeders\DemoUserSeeder"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The default `php artisan db:seed` command does not create demo accounts. Re-running the demo seeder will not replace passwords for accounts that already exist. Do not commit real passwords.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 3. Struktur Data Barang Temuan
 
-## Code of Conduct
+Data barang temuan disimpan pada tabel `found_items`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Kolom | Keterangan |
+|---|---|
+| `id` | Primary key |
+| `title` | Nama barang temuan |
+| `description` | Deskripsi barang, opsional |
+| `category_id` | Relasi ke tabel kategori |
+| `found_at` | Waktu barang ditemukan |
+| `status` | Status barang, default `Draft` |
+| `published_at` | Waktu publikasi, boleh kosong |
+| `photo_path` | Lokasi file foto, boleh kosong |
+| `created_at` | Waktu data dibuat |
+| `updated_at` | Waktu data diperbarui |
 
-## Security Vulnerabilities
+### Relasi
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Model `FoundItem` memiliki relasi `belongsTo` dengan model `Category` melalui `category_id`.
 
-## License
+Penghapusan kategori dibatasi apabila masih digunakan oleh barang temuan (`restrictOnDelete`).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 4. Alur Status Barang
+
+Barang temuan memiliki tiga status:
+
+| Status | Keterangan |
+|---|---|
+| `Draft` | Barang baru disimpan dan belum dipublikasikan |
+| `Published` | Barang telah dipublikasikan |
+| `Archived` | Barang telah diarsipkan |
+
+Transisi status:
+
+- `Draft` → `Published`
+- `Published` → `Archived`
+
+Pengelolaan publikasi dan pengarsipan dibatasi untuk Admin.
+
+Transisi yang tidak sesuai dengan aturan status ditolak oleh sistem dengan respons HTTP 409.
+
+## 5. Validasi Barang Temuan
+
+Aturan validasi pada proses penyimpanan:
+
+| Field | Aturan |
+|---|---|
+| `title` | Wajib diisi, maksimal 255 karakter |
+| `description` | Opsional, maksimal 2.000 karakter |
+| `category_id` | Wajib berupa integer dan harus tersedia di tabel kategori |
+| `found_at` | Wajib berupa tanggal yang valid dan berada dalam rentang MySQL TIMESTAMP |
+| `photo` | Opsional, harus berupa gambar dengan format yang diizinkan dan maksimal 2 MB |
+
+Barang baru disimpan dengan status awal `Draft`.
+
+## 6. Penyimpanan Foto Privat
+
+Foto barang temuan disimpan pada disk `local`, bukan pada disk `public`.
+
+Lokasi penyimpanan:
+
+`storage/app/private/found-items/`
+
+Informasi file disimpan pada kolom `photo_path` di tabel `found_items`.
+
+Ketentuan foto:
+
+- JPG
+- JPEG
+- PNG
+- WebP
+- Ukuran maksimal 2 MB
+- Foto bersifat opsional
+
+Jika proses penyimpanan data barang gagal setelah foto tersimpan, sistem menjalankan mekanisme penghapusan foto untuk mencegah file tertinggal tanpa data barang terkait.
+
+## 7. Pengujian
+
+Pengujian fitur barang temuan berada pada:
+
+`tests/Feature/FoundItemPublicationTest.php`
+
+Jalankan pengujian dengan:
+
+```bash
+php artisan test --filter=FoundItemPublicationTest
+```
+
+Pengujian mencakup:
+
+- Akses halaman input barang temuan.
+- Validasi data barang.
+- Penyimpanan barang sebagai Draft.
+- Penyimpanan foto JPG dan PNG secara privat.
+- Penolakan file bukan gambar.
+- Penolakan foto berukuran lebih dari 2 MB.
+- Validasi kategori dan deskripsi.
+- Validasi tanggal penemuan.
+- Pembatasan publikasi dan pengarsipan berdasarkan role.
+- Penolakan transisi status yang tidak valid.
+- Pembersihan foto privat ketika penyimpanan data barang gagal.
+
+Hasil pengujian terakhir yang telah dijalankan:
+
+24 tests passed, 83 assertions.
+
+## 8. Struktur Folder Penting
+
+| Folder atau file | Fungsi |
+|---|---|
+| `app/Models/` | Model aplikasi |
+| `app/Http/Controllers/` | Controller aplikasi |
+| `database/migrations/` | Struktur dan perubahan database |
+| `database/seeders/` | Data awal aplikasi |
+| `resources/views/` | Tampilan Blade |
+| `routes/web.php` | Definisi route aplikasi |
+| `tests/Feature/` | Pengujian fitur |
+| `storage/app/private/` | Penyimpanan file privat |
+
+## 9. Kontribusi
+
+Proyek FindBack dikembangkan oleh Kelompok 5 Universitas Muhammadiyah Semarang (UNIMUS).
+
+Setiap anggota bertanggung jawab atas modul, backend, halaman, pengujian, dokumentasi, Pull Request, dan demonstrasi sesuai pembagian tugas kelompok.

@@ -13,7 +13,7 @@ class EnsureRole
         Closure $next,
         string ...$roles
     ): Response {
-        if (! in_array($request->user()?->role, $roles, true)) {
+        if (! $request->user()?->hasRole(...$roles)) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 

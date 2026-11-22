@@ -582,5 +582,49 @@ class FoundItemPublicationTest extends TestCase
     }
 
 
+    /**
+     * Uploaded photo is deleted when found item creation fails.
+     */
+    public function test_uploaded_photo_is_deleted_when_found_item_creation_fails(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        FoundItem::creating(function () {
+            throw new \RuntimeException('Simulated item creation failure.');
+        });
+
+        $photo = UploadedFile::fake()->image('failed-upload.jpg');
+
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->actingAs($user)->post(route('found-items.store'), [
+                'title' => 'HP Gagal Disimpan',
+                'category_id' => $category->id,
+                'found_at' => '2026-11-05 08:00:00',
+                'photo' => $photo,
+            ]);
+
+            $this->fail('Expected item creation to fail.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame(
+                'Simulated item creation failure.',
+                $exception->getMessage()
+            );
+        }
+
+        $this->assertEmpty(
+            Storage::disk('local')->allFiles('found-items')
+        );
+
+        $this->assertDatabaseCount('found_items', 0);
+    }
 
 }

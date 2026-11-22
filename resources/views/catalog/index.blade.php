@@ -51,7 +51,11 @@
         @forelse ($items as $item)
 
             <article>
-                <h3>{{ $item->title }}</h3>
+                <h3>
+                   <a href="{{ route('found-items.show', $item) }}">
+                       {{ $item->title }}
+                   </a>
+               </h3>
 
                 <p>
                     Kategori:
