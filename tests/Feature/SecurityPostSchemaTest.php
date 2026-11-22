@@ -2,7 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
+use App\Models\FoundItem;
+use App\Models\ReturnRecord;
 use App\Models\SecurityPost;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -45,5 +50,44 @@ class SecurityPostSchemaTest extends TestCase
         $post->refresh();
 
         $this->assertFalse($post->is_active);
+    }
+
+    public function test_security_post_has_many_return_records(): void
+    {
+        $post = SecurityPost::create([
+            'name' => 'Pos Gerbang Utama',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Elektronik',
+            'slug' => 'elektronik',
+        ]);
+
+        $item = FoundItem::create([
+            'title' => 'Laptop Hitam',
+            'category_id' => $category->id,
+            'found_at' => now(),
+        ]);
+
+        $user = User::factory()->create();
+
+        $returnRecord = ReturnRecord::create([
+            'found_item_id' => $item->id,
+            'recipient_name' => 'Pemilik Laptop',
+            'security_post_id' => $post->id,
+            'processed_by' => $user->id,
+            'returned_at' => now(),
+        ]);
+
+        $this->assertInstanceOf(
+            HasMany::class,
+            $post->returnRecords()
+        );
+
+        $this->assertTrue(
+            $post->returnRecords()
+                ->whereKey($returnRecord->id)
+                ->exists()
+        );
     }
 }

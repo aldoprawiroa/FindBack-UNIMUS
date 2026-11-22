@@ -23,4 +23,9 @@ class SecurityPost extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function returnRecords(): HasMany
+    {
+        return $this->hasMany(ReturnRecord::class);
+    }
 }
