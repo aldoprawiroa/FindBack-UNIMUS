@@ -28,7 +28,7 @@
             Katalog
         </a>
 
-        @if (in_array(auth()->user()->role, ['admin', 'security'], true))
+        @if (auth()->user()->canManageReturns())
             <a href="{{ route('returns.create') }}">
                 Form Pengembalian
             </a>
@@ -40,6 +40,9 @@
 
         <span>{{ auth()->user()->name }}</span>
         <span>({{ ucfirst(auth()->user()->role ?? 'mahasiswa') }})</span>
+        @if (auth()->user()->securityPost)
+            <span class="user-security-post">[{{ auth()->user()->securityPost->name }}]</span>
+        @endif
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf
             <button type="submit">Keluar</button>

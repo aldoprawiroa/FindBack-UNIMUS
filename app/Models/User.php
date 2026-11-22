@@ -69,4 +69,35 @@ class User extends Authenticatable
     {
         return $this->hasRole('admin', 'security');
     }
+
+    public function assignSecurityPost(SecurityPost|int $securityPost): static
+    {
+        $this->security_post_id = $securityPost instanceof SecurityPost
+            ? $securityPost->id
+            : $securityPost;
+
+        $this->save();
+
+        return $this;
+    }
+
+    public function unassignSecurityPost(): static
+    {
+        $this->security_post_id = null;
+        $this->save();
+
+        return $this;
+    }
+
+    public function hasAssignedSecurityPost(): bool
+    {
+        return $this->security_post_id !== null;
+    }
+
+    public function isAssignedTo(SecurityPost|int $securityPost): bool
+    {
+        $postId = $securityPost instanceof SecurityPost ? $securityPost->id : $securityPost;
+
+        return $this->security_post_id === $postId;
+    }
 }
