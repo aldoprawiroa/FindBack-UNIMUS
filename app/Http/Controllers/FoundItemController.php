@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\FoundItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use RuntimeException;
@@ -101,6 +102,8 @@ class FoundItemController extends Controller
      */
     public function publish(FoundItem $foundItem): RedirectResponse
     {
+        Gate::authorize('publish', $foundItem);
+
         abort_unless(
             $foundItem->status === 'Draft',
             409,
@@ -122,6 +125,8 @@ class FoundItemController extends Controller
      */
     public function archive(FoundItem $foundItem): RedirectResponse
     {
+        Gate::authorize('archive', $foundItem);
+
         abort_unless(
             $foundItem->status === 'Published',
             409,

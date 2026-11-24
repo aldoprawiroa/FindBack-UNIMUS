@@ -38,6 +38,12 @@
             </a>
         @endif
 
+        @if (auth()->user()->isAdmin())
+            <a href="{{ route('admin.post-assignments.index') }}">
+                Penugasan Pos
+            </a>
+        @endif
+
         <span>{{ auth()->user()->name }}</span>
         <span>({{ ucfirst(auth()->user()->role ?? 'mahasiswa') }})</span>
         @if (auth()->user()->securityPost)
