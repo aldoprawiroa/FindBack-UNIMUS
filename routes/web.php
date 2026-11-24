@@ -1,6 +1,7 @@
 
 <?php
 
+use App\Http\Controllers\AdminPostAssignmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\FoundItemController;
@@ -54,12 +55,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/found-items', [FoundItemController::class, 'store'])
         ->name('found-items.store');
 
-    // Pengelolaan status barang (Admin saja)
+    // Pengelolaan status barang & penugasan pos (Admin saja)
     Route::middleware('role:admin')->group(function () {
         Route::post('/found-items/{foundItem}/publish', [FoundItemController::class, 'publish'])
             ->name('found-items.publish');
 
         Route::post('/found-items/{foundItem}/archive', [FoundItemController::class, 'archive'])
             ->name('found-items.archive');
+
+        Route::get('/admin/post-assignments', [AdminPostAssignmentController::class, 'index'])
+            ->name('admin.post-assignments.index');
+
+        Route::patch('/admin/post-assignments/{user}', [AdminPostAssignmentController::class, 'update'])
+            ->whereNumber('user')
+            ->name('admin.post-assignments.update');
     });
 });

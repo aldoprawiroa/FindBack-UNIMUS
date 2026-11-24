@@ -8,6 +8,7 @@ use App\Models\SecurityPost;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -15,6 +16,8 @@ class ReturnController extends Controller
 {
     public function create(): View
     {
+        Gate::authorize('create', ReturnRecord::class);
+
         $items = FoundItem::query()
             ->whereNotNull('published_at')
             ->whereNotIn('status', ['Returned', 'Archived'])
@@ -34,6 +37,8 @@ class ReturnController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', ReturnRecord::class);
+
         $validated = $request->validate([
             'found_item_id' => [
                 'required',
@@ -99,6 +104,8 @@ class ReturnController extends Controller
 
     public function index(Request $request): View
     {
+        Gate::authorize('viewAny', ReturnRecord::class);
+
         $query = ReturnRecord::query()
             ->with(['foundItem', 'securityPost', 'processor'])
             ->latest('returned_at');
