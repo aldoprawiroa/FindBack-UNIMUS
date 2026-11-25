@@ -30,7 +30,7 @@ Demo accounts can only be seeded in local or testing environments. Set a local `
 php artisan db:seed --class="Database\Seeders\DemoUserSeeder"
 ```
 
-The default `php artisan db:seed` command does not create demo accounts. Re-running the demo seeder will not replace passwords for accounts that already exist. Do not commit real passwords.
+The default `php artisan db:seed` command does not create demo accounts. Akun demo yang dibuat: `mahasiswa@unimus.ac.id`, `dosen@unimus.ac.id`, `admin@unimus.ac.id`, dan `security@unimus.ac.id` (satpam, otomatis ditugaskan ke Pos Gerbang Utama). Re-running the demo seeder will not replace passwords for accounts that already exist. Do not commit real passwords.
 
 
 ## 3. Struktur Data Barang Temuan

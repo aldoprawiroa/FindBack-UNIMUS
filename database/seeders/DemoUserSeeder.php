@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SecurityPost;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -25,10 +26,16 @@ class DemoUserSeeder extends Seeder
             throw new RuntimeException('DEMO_USER_PASSWORD must be at least 8 characters.');
         }
 
+        $demoPost = SecurityPost::firstOrCreate(
+            ['name' => 'Pos Gerbang Utama'],
+            ['is_active' => true]
+        );
+
         foreach ([
             ['name' => 'Mahasiswa Demo', 'email' => 'mahasiswa@unimus.ac.id', 'role' => 'mahasiswa'],
             ['name' => 'Dosen Demo', 'email' => 'dosen@unimus.ac.id', 'role' => 'dosen'],
             ['name' => 'Admin Demo', 'email' => 'admin@unimus.ac.id', 'role' => 'admin'],
+            ['name' => 'Satpam Demo', 'email' => 'security@unimus.ac.id', 'role' => 'security', 'security_post_id' => $demoPost->id],
         ] as $demoUser) {
             User::firstOrCreate(
                 ['email' => $demoUser['email']],
