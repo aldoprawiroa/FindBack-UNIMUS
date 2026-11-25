@@ -20,14 +20,29 @@ class DemoUserSeederTest extends TestCase
         $this->seed(DemoUserSeeder::class);
         $this->seed(DemoUserSeeder::class);
 
-        $this->assertSame(3, User::count());
+        $this->assertSame(4, User::count());
 
-        foreach (['mahasiswa', 'dosen', 'admin'] as $role) {
+        foreach (['mahasiswa', 'dosen', 'admin', 'security'] as $role) {
             $user = User::where('email', "$role@unimus.ac.id")->firstOrFail();
 
             $this->assertSame($role, $user->role);
             $this->assertTrue(Hash::check('demo-secret', $user->password));
         }
+    }
+
+    public function test_demo_security_account_is_assigned_to_an_active_post(): void
+    {
+        config()->set('app.demo_user_password', 'demo-secret');
+
+        $this->seed(DemoUserSeeder::class);
+        $this->seed(DemoUserSeeder::class);
+
+        $security = User::where('email', 'security@unimus.ac.id')->firstOrFail();
+
+        $this->assertSame('security', $security->role);
+        $this->assertNotNull($security->securityPost);
+        $this->assertTrue($security->securityPost->is_active);
+        $this->assertSame(1, \App\Models\SecurityPost::where('name', 'Pos Gerbang Utama')->count());
     }
 
     public function test_blank_demo_password_is_rejected_without_creating_accounts(): void
@@ -78,7 +93,7 @@ class DemoUserSeederTest extends TestCase
 
         $this->seed(DemoUserSeeder::class);
 
-        $this->assertSame(3, User::count());
+        $this->assertSame(4, User::count());
         $this->assertTrue(Hash::check('demo1234', User::where('email', 'admin@unimus.ac.id')->firstOrFail()->password));
     }
 
@@ -90,7 +105,7 @@ class DemoUserSeederTest extends TestCase
         config()->set('app.demo_user_password', 'replacement-secret');
         $this->seed(DemoUserSeeder::class);
 
-        $this->assertSame(3, User::count());
+        $this->assertSame(4, User::count());
 
         foreach (User::all() as $user) {
             $this->assertTrue(Hash::check('original-secret', $user->password));
