@@ -18,6 +18,20 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_SECURITY = 'security';
+
+    public const ROLE_MAHASISWA = 'mahasiswa';
+
+    public const ROLE_DOSEN = 'dosen';
+
+    /** @var list<string> */
+    public const STAFF_ROLES = [
+        self::ROLE_ADMIN,
+        self::ROLE_SECURITY,
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -42,22 +56,22 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
     }
 
     public function isSecurity(): bool
     {
-        return $this->role === 'security';
+        return $this->role === self::ROLE_SECURITY;
     }
 
     public function isMahasiswa(): bool
     {
-        return $this->role === 'mahasiswa';
+        return $this->role === self::ROLE_MAHASISWA;
     }
 
     public function isDosen(): bool
     {
-        return $this->role === 'dosen';
+        return $this->role === self::ROLE_DOSEN;
     }
 
     public function hasRole(string ...$roles): bool
@@ -67,7 +81,7 @@ class User extends Authenticatable
 
     public function canManageReturns(): bool
     {
-        return $this->hasRole('admin', 'security');
+        return $this->hasRole(...self::STAFF_ROLES);
     }
 
     public function assignSecurityPost(SecurityPost|int $securityPost): static

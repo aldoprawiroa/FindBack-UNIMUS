@@ -39,7 +39,22 @@ class AuthTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('login'));
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('catalog.index'));
+    }
+
+    /**
+     * Test authenticated user on landing page sees catalog link instead of broken dashboard route.
+     */
+    public function test_welcome_page_links_authenticated_user_to_catalog(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/');
+
+        $response->assertOk();
+        $response->assertSee(route('catalog.index'));
+        $response->assertSee('Katalog Barang');
+        $response->assertDontSee('/dashboard');
     }
 
     /**
