@@ -21,7 +21,7 @@ class AdminPostAssignmentController extends Controller
 
         $staffUsers = User::query()
             ->with('securityPost')
-            ->whereIn('role', ['admin', 'security'])
+            ->whereIn('role', User::STAFF_ROLES)
             ->orderBy('name')
             ->get();
 
