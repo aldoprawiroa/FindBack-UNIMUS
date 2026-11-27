@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -79,9 +80,27 @@ class User extends Authenticatable
         return in_array($this->role, $roles, true);
     }
 
-    public function canManageReturns(): bool
+    /**
+     * Batasi query hanya untuk akun staf (admin dan satpam).
+     */
+    public function scopeStaff(Builder $query): Builder
+    {
+        return $query->whereIn('role', self::STAFF_ROLES);
+    }
+
+    public function isStaff(): bool
     {
         return $this->hasRole(...self::STAFF_ROLES);
+    }
+
+    public function canManageReturns(): bool
+    {
+        return $this->isStaff();
+    }
+
+    public function hasActiveSecurityPost(): bool
+    {
+        return $this->securityPost?->is_active === true;
     }
 
     public function assignSecurityPost(SecurityPost|int $securityPost): static

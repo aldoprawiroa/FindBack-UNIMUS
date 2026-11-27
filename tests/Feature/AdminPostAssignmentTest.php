@@ -164,4 +164,18 @@ class AdminPostAssignmentTest extends TestCase
             ->assertOk()
             ->assertDontSee(route('admin.post-assignments.index'));
     }
+
+    public function test_post_assignment_page_marks_inactive_assigned_post(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $inactivePost = SecurityPost::create(['name' => 'Pos Lama', 'is_active' => false]);
+        User::factory()->security($inactivePost)->create(['name' => 'Satpam Pos Lama']);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.post-assignments.index'));
+
+        $response->assertOk();
+        $response->assertSee('Satpam Pos Lama');
+        $response->assertSee('Pos Lama (Nonaktif)');
+    }
 }
