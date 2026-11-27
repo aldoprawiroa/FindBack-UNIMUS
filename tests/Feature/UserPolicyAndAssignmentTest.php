@@ -128,4 +128,44 @@ class UserPolicyAndAssignmentTest extends TestCase
         $response->assertDontSee(route('returns.create'));
         $response->assertDontSee(route('returns.index'));
     }
+
+    public function test_user_staff_scope_and_active_security_post_helpers(): void
+    {
+        $activePost = SecurityPost::create(['name' => 'Pos Utama', 'is_active' => true]);
+        $inactivePost = SecurityPost::create(['name' => 'Pos Lama', 'is_active' => false]);
+
+        $admin = User::factory()->admin()->create(['security_post_id' => $activePost->id]);
+        $security = User::factory()->security($inactivePost)->create();
+        $mahasiswa = User::factory()->mahasiswa()->create();
+
+        $this->assertTrue($admin->isStaff());
+        $this->assertTrue($security->isStaff());
+        $this->assertFalse($mahasiswa->isStaff());
+
+        $this->assertTrue($admin->hasActiveSecurityPost());
+        $this->assertFalse($security->hasActiveSecurityPost());
+        $this->assertFalse($mahasiswa->hasActiveSecurityPost());
+
+        $staffIds = User::query()->staff()->pluck('id')->all();
+        $this->assertContains($admin->id, $staffIds);
+        $this->assertContains($security->id, $staffIds);
+        $this->assertNotContains($mahasiswa->id, $staffIds);
+    }
+
+    public function test_user_policy_view_and_view_any_rules(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $security = User::factory()->security()->create();
+        $mahasiswa = User::factory()->mahasiswa()->create();
+
+        $policy = new UserPolicy();
+
+        $this->assertTrue($policy->viewAny($admin));
+        $this->assertFalse($policy->viewAny($security));
+        $this->assertFalse($policy->viewAny($mahasiswa));
+
+        $this->assertTrue($policy->view($admin, $security));
+        $this->assertTrue($policy->view($security, $security));
+        $this->assertFalse($policy->view($security, $mahasiswa));
+    }
 }

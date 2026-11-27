@@ -38,7 +38,13 @@
                         <td>{{ $staff->name }}</td>
                         <td>{{ $staff->email }}</td>
                         <td>{{ ucfirst($staff->role) }}</td>
-                        <td>{{ $staff->securityPost?->name ?? 'Belum ditugaskan' }}</td>
+                        <td>
+                            @if ($staff->securityPost)
+                                {{ $staff->securityPost->name }}@if (! $staff->securityPost->is_active) (Nonaktif)@endif
+                            @else
+                                Belum ditugaskan
+                            @endif
+                        </td>
                         <td>
                             <form method="POST" action="{{ route('admin.post-assignments.update', $staff) }}">
                                 @csrf
