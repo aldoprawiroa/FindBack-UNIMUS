@@ -168,4 +168,17 @@ class UserPolicyAndAssignmentTest extends TestCase
         $this->assertTrue($policy->view($security, $security));
         $this->assertFalse($policy->view($security, $mahasiswa));
     }
+
+    public function test_navigation_marks_inactive_assigned_security_post(): void
+    {
+        $inactivePost = SecurityPost::create(['name' => 'Pos Lama', 'is_active' => false]);
+        $user = User::factory()->security($inactivePost)->create([
+            'name' => 'Satpam Lama',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('catalog.index'));
+
+        $response->assertOk();
+        $response->assertSee('[Pos Lama (Nonaktif)]');
+    }
 }

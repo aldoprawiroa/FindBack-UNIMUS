@@ -178,4 +178,40 @@ class AdminPostAssignmentTest extends TestCase
         $response->assertSee('Satpam Pos Lama');
         $response->assertSee('Pos Lama (Nonaktif)');
     }
+
+    public function test_post_assignment_page_can_filter_by_staff_role(): void
+    {
+        $admin = User::factory()->admin()->create(['name' => 'Admin Login']);
+        User::factory()->admin()->create(['name' => 'Admin Lain']);
+        $security = User::factory()->security()->create(['name' => 'Satpam Filter']);
+
+        $securityOnly = $this->actingAs($admin)
+            ->get(route('admin.post-assignments.index', ['role' => 'security']));
+
+        $securityOnly->assertOk();
+        $securityOnly->assertSee('Satpam Filter');
+        $securityOnly->assertDontSee('Admin Lain');
+        $securityOnly->assertViewHas('staffUsers', fn ($users) => $users->count() === 1 && $users->first()->is($security));
+
+        $invalidRole = $this->actingAs($admin)
+            ->get(route('admin.post-assignments.index', ['role' => 'mahasiswa']));
+
+        $invalidRole->assertSessionHasErrors('role');
+    }
+
+    public function test_re_assigning_same_post_returns_success_without_breaking_state(): void
+    {
+        $post = SecurityPost::create(['name' => 'Pos Gerbang Utama', 'is_active' => true]);
+        $admin = User::factory()->admin()->create();
+        $security = User::factory()->security($post)->create(['name' => 'Satpam Tetap']);
+
+        $response = $this->actingAs($admin)
+            ->patch(route('admin.post-assignments.update', $security), [
+                'security_post_id' => $post->id,
+            ]);
+
+        $response->assertRedirect(route('admin.post-assignments.index'));
+        $response->assertSessionHas('success', 'Satpam Tetap sudah ditugaskan di Pos Gerbang Utama.');
+        $this->assertSame($post->id, $security->fresh()->security_post_id);
+    }
 }
