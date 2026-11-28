@@ -4,6 +4,7 @@
 use App\Http\Controllers\AdminPostAssignmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FoundItemController;
 use App\Http\Controllers\ReturnController;
 use Illuminate\Support\Facades\Route;
@@ -69,5 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/admin/post-assignments/{user}', [AdminPostAssignmentController::class, 'update'])
             ->whereNumber('user')
             ->name('admin.post-assignments.update');
+        Route::get('/admin/categories', [CategoryController::class, 'index'])
+            ->name('admin.categories.index');
     });
 });
