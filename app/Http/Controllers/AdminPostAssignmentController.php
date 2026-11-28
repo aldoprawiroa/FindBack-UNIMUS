@@ -15,13 +15,20 @@ class AdminPostAssignmentController extends Controller
     /**
      * Tampilkan daftar petugas/admin dan pos satpam aktif untuk penugasan.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('viewAny', User::class);
+
+        $validated = $request->validate([
+            'role' => ['nullable', 'string', Rule::in(User::STAFF_ROLES)],
+        ]);
+
+        $selectedRole = $validated['role'] ?? null;
 
         $staffUsers = User::query()
             ->with('securityPost')
             ->staff()
+            ->when($selectedRole !== null, fn ($query) => $query->where('role', $selectedRole))
             ->orderBy('name')
             ->get();
 
@@ -32,7 +39,8 @@ class AdminPostAssignmentController extends Controller
 
         return view('admin.post-assignments.index', compact(
             'staffUsers',
-            'securityPosts'
+            'securityPosts',
+            'selectedRole'
         ));
     }
 
@@ -54,6 +62,12 @@ class AdminPostAssignmentController extends Controller
         $postId = $validated['security_post_id'] ?? null;
 
         if ($postId === null) {
+            if (! $user->hasAssignedSecurityPost()) {
+                return redirect()
+                    ->route('admin.post-assignments.index')
+                    ->with('success', "Penugasan pos untuk {$user->name} tetap kosong.");
+            }
+
             $user->unassignSecurityPost();
 
             return redirect()
@@ -66,6 +80,12 @@ class AdminPostAssignmentController extends Controller
             ->findOrFail($postId);
 
         Gate::authorize('assignSecurityPost', [$user, $post]);
+
+        if ($user->isAssignedTo($post)) {
+            return redirect()
+                ->route('admin.post-assignments.index')
+                ->with('success', "{$user->name} sudah ditugaskan di {$post->name}.");
+        }
 
         $user->assignSecurityPost($post);
 

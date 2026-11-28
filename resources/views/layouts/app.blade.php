@@ -47,7 +47,7 @@
         <span>{{ auth()->user()->name }}</span>
         <span>({{ ucfirst(auth()->user()->role ?? 'mahasiswa') }})</span>
         @if (auth()->user()->securityPost)
-            <span class="user-security-post">[{{ auth()->user()->securityPost->name }}]</span>
+            <span class="user-security-post">[{{ auth()->user()->securityPost->name }}@if (! auth()->user()->hasActiveSecurityPost()) (Nonaktif)@endif]</span>
         @endif
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf

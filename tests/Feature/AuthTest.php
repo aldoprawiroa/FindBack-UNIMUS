@@ -353,4 +353,18 @@ class AuthTest extends TestCase
         $response->assertSee('Keluar');
         $response->assertSee(route('logout'));
     }
+
+    /**
+     * Test oversized email and password fields are rejected by login validation.
+     */
+    public function test_login_rejects_oversized_email_and_password(): void
+    {
+        $response = $this->post(route('login'), [
+            'email' => str_repeat('a', 245).'@unimus.ac.id',
+            'password' => str_repeat('p', 256),
+        ]);
+
+        $response->assertSessionHasErrors(['email', 'password']);
+        $this->assertGuest();
+    }
 }

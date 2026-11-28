@@ -7,6 +7,19 @@
     <h1>Penugasan Pos Admin &amp; Satpam</h1>
     <p>Atur penugasan pos keamanan aktif untuk akun admin dan petugas satpam.</p>
 
+    <form method="GET" action="{{ route('admin.post-assignments.index') }}">
+        <label for="filter_role">Filter Peran:</label>
+        <select name="role" id="filter_role">
+            <option value="">Semua Staf</option>
+            @foreach (\App\Models\User::STAFF_ROLES as $roleOption)
+                <option value="{{ $roleOption }}" {{ ($selectedRole ?? null) === $roleOption ? 'selected' : '' }}>
+                    {{ ucfirst($roleOption) }}
+                </option>
+            @endforeach
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
     @if (session('success'))
         <p role="status">{{ session('success') }}</p>
     @endif
